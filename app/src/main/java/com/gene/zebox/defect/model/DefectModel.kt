@@ -27,6 +27,7 @@ class DefectModel {
                 sql.append(" )")
             }
         }
+        sql.append(" ORDER BY count DESC")
         val query = RoomSQLiteQuery.acquire(sql.toString(), 0)
         return lock.read {
             return try {
@@ -49,7 +50,7 @@ class DefectModel {
 
     fun updateCountAndTime(vararg defectItem: DefectItem) {
         defectItem.forEach {
-            it.cout.inc()
+            it.count = it.count + 1
             it.timestamp = System.currentTimeMillis()
         }
         lock.write { dao.update(*defectItem) }

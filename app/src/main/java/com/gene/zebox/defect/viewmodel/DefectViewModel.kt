@@ -62,6 +62,9 @@ class DefectViewModel : ViewModel() {
             if (selectResult.value == null) ArrayList() else selectResult.value!!
         list.add(defectItem)
         selectResult.value = list
+        viewModelScope.launch(Dispatchers.IO) {
+            model.updateCountAndTime(defectItem)
+        }
     }
 
     fun newItem() {

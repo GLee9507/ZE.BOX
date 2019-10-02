@@ -11,7 +11,7 @@ open class DefectItem(
     val letter: String,
     var timestamp: Long = 0,
     //使用次数
-    var cout: Long = 0
+    var count: Long = 0
 ) {
 
     companion object {

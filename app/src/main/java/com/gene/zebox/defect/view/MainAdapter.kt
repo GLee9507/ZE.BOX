@@ -36,9 +36,10 @@ class MainViewHolder(view: View, adapter: MainAdapter) : RecyclerView.ViewHolder
         view.findViewById<TextView>(android.R.id.text1)
     }
     private lateinit var data: DefectItem
+    @SuppressLint("SetTextI18n")
     fun bindData(data: DefectItem) {
         this.data = data
-        textView.text = data.text
+        textView.text = data.text+"--"+data.count.toString()
     }
 
     init {

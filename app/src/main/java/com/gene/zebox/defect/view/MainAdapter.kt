@@ -13,21 +13,37 @@ import com.gene.zebox.defect.model.DefectItem
 class MainAdapter : ListAdapter<DefectItem, MainViewHolder>(DefectItem.ITEM_CALLBACK) {
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MainViewHolder {
         return MainViewHolder(
-            LayoutInflater.from(App.context).inflate(
+            LayoutInflater.from(App.CONTEXT).inflate(
                 android.R.layout.simple_list_item_1,
                 parent,
                 false
-            )
+            ), this
         )
     }
 
     @SuppressLint("SetTextI18n")
     override fun onBindViewHolder(holder: MainViewHolder, position: Int) {
-        holder.textView.text = "${position + 1}. ${getItem(position).text}"
+        holder.bindData(getItem(position))
     }
+
+
+    var clickListener: ((data: DefectItem) -> Unit)? = null
 
 }
 
-data class MainViewHolder(val view: View) : RecyclerView.ViewHolder(view) {
-    val textView: TextView by lazy { view.findViewById<TextView>(android.R.id.text1) }
+class MainViewHolder(view: View, adapter: MainAdapter) : RecyclerView.ViewHolder(view) {
+    private val textView: TextView by lazy {
+        view.findViewById<TextView>(android.R.id.text1)
+    }
+    private lateinit var data: DefectItem
+    fun bindData(data: DefectItem) {
+        this.data = data
+        textView.text = data.text
+    }
+
+    init {
+        view.setOnClickListener {
+            adapter.clickListener?.invoke(data)
+        }
+    }
 }

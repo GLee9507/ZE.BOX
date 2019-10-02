@@ -1,5 +1,6 @@
 package com.gene.zebox.defect.widget
 
+import android.graphics.Color
 import android.view.Gravity
 import android.view.View
 import android.widget.PopupWindow
@@ -19,13 +20,18 @@ class ListPopupWindow(private val attachView: View) {
             RecyclerView(attachView.context).apply {
                 layoutManager = LinearLayoutManager(context)
                 adapter = this@ListPopupWindow.adapter
+                setBackgroundColor(Color.LTGRAY)
             }, -1, -1
         )
     }
 
-    fun submitAndshow(data: List<DefectItem>) {
-        adapter.submitList(data) {
-            show()
+    fun submitAndShow(data: List<DefectItem>?) {
+        if (data.isNullOrEmpty()) {
+            dismiss()
+        } else {
+            adapter.submitList(data) {
+                show()
+            }
         }
     }
 
@@ -36,4 +42,11 @@ class ListPopupWindow(private val attachView: View) {
     fun dismiss() {
         popupWindow.dismiss()
     }
+
+    fun isShowing() = popupWindow.isShowing
+
+    fun setOnItemClickListener(listener: (data: DefectItem) -> Unit) {
+        adapter.clickListener = listener
+    }
+
 }

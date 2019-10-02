@@ -1,6 +1,12 @@
 package com.gene.zebox.defect.viewmodel
 
-import androidx.lifecycle.*
+import android.os.Handler
+import android.os.Looper
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.gene.zebox.App.Companion.EXCEPTION_HANDLER
 import com.gene.zebox.LetterUtil
 import com.gene.zebox.defect.model.DefectItem
 import com.gene.zebox.defect.model.DefectModel
@@ -9,57 +15,38 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 
 class DefectViewModel : ViewModel() {
-
+    companion object {
+        const val QUERY = 100
+    }
 
     private val model by lazy { DefectModel() }
     val edit = MutableLiveData<String>()
-    val queryResult = MutableLiveData<Array<DefectItem>>()
-    val selectResult = MutableLiveData<MutableList<DefectItem>>()
+    val queryResult = MutableLiveData<Array<DefectItem>?>()
+    val selectResult = MutableLiveData<MutableList<DefectItem>?>()
     val allLiveData by lazy { model.getLiveData() }
-    private val switcher = MutableLiveData<Boolean>()
-    val listLiveData = object : MediatorLiveData<MutableList<DefectItem>>() {
-        /**
-         * if false 使用selectResult else 使用queryResult
-         */
-        var switcherFlag = false
-
-        init {
-            addSource(switcher) {
-                value = if (it) {
-                    queryResult.value?.toMutableList()
-                } else {
-                    selectResult.value
+    private val handler by lazy {
+        Handler(Looper.getMainLooper()) {
+            return@Handler if (it.what == QUERY) {
+                val string = it.obj as String?
+                if (string.isNullOrEmpty()) {
+                    queryResult.value = null
+                    return@Handler true
                 }
-                switcherFlag = it
-            }
-
-            addSource(queryResult) {
-                if (switcherFlag) {
-                    value = it.toMutableList()
+                viewModelScope.launch {
+                    val result = async(Dispatchers.IO) {
+                        model.queryInput(string)
+                    }
+                    queryResult.value = result.await()
                 }
-            }
+                true
+            } else false
 
-            addSource(selectResult) {
-                if (!switcherFlag) {
-                    value = it
-                }
-            }
         }
     }
     private val ob = Observer<String> {
-        if (it.isNullOrEmpty()) {
-            switcher.value = false
-            return@Observer
-        }
-        switcher.value = true
-
-        viewModelScope.launch {
-            val str = it
-            val result = async(Dispatchers.IO) {
-                model.queryInput(str)
-            }
-            queryResult.value = result.await()
-        }
+        handler.removeMessages(QUERY)
+        val message = handler.obtainMessage(QUERY, it)
+        handler.sendMessageDelayed(message, 256)
     }
 
     init {
@@ -70,13 +57,11 @@ class DefectViewModel : ViewModel() {
         edit.removeObserver(ob)
     }
 
-    fun add2Selected(index: Int) {
-        queryResult.value?.let {
-            val list: MutableList<DefectItem> =
-                if (selectResult.value == null) ArrayList() else selectResult.value!!
-            list.add(it[index])
-            selectResult.value = list
-        }
+    fun add2Selected(defectItem: DefectItem) {
+        val list: MutableList<DefectItem> =
+            if (selectResult.value == null) ArrayList() else selectResult.value!!
+        list.add(defectItem)
+        selectResult.value = list
     }
 
     fun newItem() {
@@ -84,23 +69,23 @@ class DefectViewModel : ViewModel() {
         if (string.isNullOrEmpty()) {
             return
         }
-        viewModelScope.launch {
+        viewModelScope.launch(EXCEPTION_HANDLER) {
             if (string.isNullOrEmpty()) {
                 return@launch
             }
-            val async = async(Dispatchers.IO) {
+            val async = async(Dispatchers.IO + EXCEPTION_HANDLER) {
+                val defectItem = DefectItem(
+                    string,
+                    LetterUtil.getSpells(string)
+                )
                 try {
-                    val defectItem = DefectItem(
-                        string,
-                        LetterUtil.getSpells(string)
-                    )
                     model.insert(
                         defectItem
                     )
-                    return@async defectItem
                 } catch (e: Exception) {
                     throw e
                 }
+                return@async defectItem
             }
             val list: MutableList<DefectItem> =
                 if (selectResult.value == null) ArrayList() else selectResult.value!!

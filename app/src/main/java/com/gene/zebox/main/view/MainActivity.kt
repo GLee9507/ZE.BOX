@@ -3,7 +3,7 @@ package com.gene.zebox.main.view
 import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
-import com.gene.zebox.task.view.NewTaskActivity
+import com.gene.zebox.defect.view.DefectActivity
 import com.gene.zebox.R
 import kotlinx.android.synthetic.main.activity_main.*
 
@@ -15,7 +15,7 @@ class MainActivity : AppCompatActivity() {
             startActivity(
                 Intent(
                     this@MainActivity,
-                    NewTaskActivity::class.java
+                    DefectActivity::class.java
                 )
             )
         }

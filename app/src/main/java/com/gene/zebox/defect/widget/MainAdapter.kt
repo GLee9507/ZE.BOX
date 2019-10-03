@@ -1,5 +1,6 @@
-package com.gene.zebox.defect.view
+package com.gene.zebox.defect.widget
 
+import android.R
 import android.annotation.SuppressLint
 import android.view.LayoutInflater
 import android.view.View
@@ -14,7 +15,7 @@ class MainAdapter : ListAdapter<DefectItem, MainViewHolder>(DefectItem.ITEM_CALL
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MainViewHolder {
         return MainViewHolder(
             LayoutInflater.from(App.CONTEXT).inflate(
-                android.R.layout.simple_list_item_1,
+                R.layout.simple_list_item_1,
                 parent,
                 false
             ), this

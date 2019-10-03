@@ -7,13 +7,15 @@ import androidx.room.PrimaryKey
 @Entity(tableName = "defect_item")
 open class DefectItem(
     @PrimaryKey
-    val text: String,
-    val letter: String,
+    var text: String,
+    var letter: String,
     var timestamp: Long = 0,
     //使用次数
     var count: Long = 0
 ) {
-
+    override fun toString(): String {
+        return text
+    }
     companion object {
 
         val ITEM_CALLBACK = object : DiffUtil.ItemCallback<DefectItem>() {

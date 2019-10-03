@@ -1,14 +1,13 @@
 package com.gene.zebox.defect.widget
 
-import android.graphics.Color
 import android.view.Gravity
 import android.view.View
 import android.widget.PopupWindow
+import androidx.appcompat.view.ContextThemeWrapper
 import androidx.core.widget.PopupWindowCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.gene.zebox.defect.model.DefectItem
-import com.gene.zebox.defect.view.MainAdapter
 
 class ListPopupWindow(private val attachView: View) {
     private val adapter by lazy {
@@ -17,12 +16,16 @@ class ListPopupWindow(private val attachView: View) {
 
     private val popupWindow: PopupWindow by lazy {
         PopupWindow(
-            RecyclerView(attachView.context).apply {
+            RecyclerView(
+                ContextThemeWrapper(
+                    attachView.context,
+                    androidx.appcompat.R.style.Widget_AppCompat_ListPopupWindow
+                )
+            ).apply {
                 layoutManager = LinearLayoutManager(context)
                 adapter = this@ListPopupWindow.adapter
-                setBackgroundColor(Color.LTGRAY)
             }, -1, -1
-        )
+        ).apply { }
     }
 
     fun submitAndShow(data: List<DefectItem>?) {

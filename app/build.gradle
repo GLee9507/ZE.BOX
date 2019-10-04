@@ -11,7 +11,7 @@ android {
     buildToolsVersion "29.0.1"
     defaultConfig {
         applicationId "com.gene.zebox"
-        minSdkVersion 19
+        minSdkVersion 21
         targetSdkVersion 29
         versionCode 1
         versionName "1.0"
@@ -32,6 +32,9 @@ android {
     }
     kotlinOptions {
         jvmTarget = "1.8"
+    }
+    lintOptions {
+        disable 'PrivateResource'
     }
 }
 
@@ -65,7 +68,7 @@ dependencies {
     implementation 'androidx.lifecycle:lifecycle-extensions:2.1.0'
     // For Kotlin use kapt instead of annotationProcessor
     // alternately - if using Java8, use the following instead of lifecycle-compiler
-
+    implementation 'com.wdullaer:materialdatetimepicker:4.2.3'
 
     // optional - Test helpers for LiveData
 //    testImplementation "androidx.arch.core:core-testing:$lifecycle_version"

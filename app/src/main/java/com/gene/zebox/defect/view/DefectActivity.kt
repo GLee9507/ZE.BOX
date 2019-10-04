@@ -1,7 +1,6 @@
 package com.gene.zebox.defect.view
 
-import android.animation.Animator
-import android.animation.ValueAnimator
+import android.graphics.Color
 import android.os.Bundle
 import android.view.KeyEvent
 import android.view.Menu
@@ -15,15 +14,13 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.gene.zebox.R
 import com.gene.zebox.databinding.ActivityNewTaskBinding
 import com.gene.zebox.defect.viewmodel.DefectViewModel
-import com.gene.zebox.defect.widget.AutoCompleteAdapter
-import com.gene.zebox.defect.widget.ListPopupWindow
+import com.gene.zebox.defect.widget.CrateDefectDelegate
 import com.gene.zebox.defect.widget.MainAdapter
-import com.gene.zebox.defect.widget.SuggestAdapter
+import com.google.android.material.snackbar.Snackbar
 import kotlinx.android.synthetic.main.activity_new_task.*
 
 
 class DefectActivity : AppCompatActivity() {
-    private lateinit var mainAdapter: MainAdapter
 
     private val binding by lazy {
         DataBindingUtil.setContentView<ActivityNewTaskBinding>(
@@ -33,38 +30,15 @@ class DefectActivity : AppCompatActivity() {
     }
     private val vm by lazy { ViewModelProviders.of(this)[DefectViewModel::class.java] }
 
-    private val popupWindow by lazy {
-        ListPopupWindow(binding.edit).apply {
-            setOnItemClickListener {
-                binding.vm?.add2Selected(it)
-                binding.edit.setText("")
-                dismiss()
-            }
-        }
-    }
-
-    private val adapter by lazy {
-        AutoCompleteAdapter(vm.allLiveData)
-    }
-
-
-    private val pop by lazy {
-        androidx.appcompat.widget.ListPopupWindow(this).apply {
-            this.setAdapter(this@DefectActivity.adapter)
-            this.setOnDismissListener {
-                adapter.clear()
-            }
-        }
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        val info = intent.getParcelableExtra<CrateDefectDelegate.Info>("info")!!
+        initToolBar(info)
         binding.lifecycleOwner = this
         binding.vm = vm
-        recycler.layoutManager = LinearLayoutManager(this)
-//        recycler.adapter = SuggestAdapter(vm.allLiveData)
-//        mainAdapter = recycler.adapter as MainAdapter
-        binding.suggest.adapter = SuggestAdapter(vm.allLiveData)
+        binding.recycler.layoutManager = LinearLayoutManager(this)
+        binding.recycler.adapter = MainAdapter()
         edit.setOnEditorActionListener { _, actionId, event ->
             if (actionId == EditorInfo.IME_ACTION_DONE ||
                 (event != null &&
@@ -77,46 +51,50 @@ class DefectActivity : AppCompatActivity() {
             return@setOnEditorActionListener true
         }
 
+
         vm.edit.observe(this) {
 
-            val suggestAdapter = binding.suggest.adapter as SuggestAdapter
-            suggestAdapter.submit(it) { hasData ->
-                binding.suggestView.visibility = if (hasData) {
-                    showAnimator.start()
-                    View.VISIBLE
+            binding.suggest.query(it) { hasData ->
+                if (hasData) {
+                    binding.back.visibility = View.VISIBLE
                 } else {
-
-                    View.INVISIBLE
+                    binding.back.visibility = View.INVISIBLE
                 }
             }
 
         }
-        vm.allLiveData.observe(this) {}
-    }
-
-    private val showAnimator by lazy {
-        val ofFloat = ValueAnimator.ofFloat(0F, 1F)
-        ofFloat.duration = 618
-        ofFloat.addUpdateListener {
-            binding.suggestGroup.visibility = View.VISIBLE
-            binding.suggestGroup.alpha = it.animatedValue as Float
+        vm.selectResult.observe(this) {
+            val adapter = binding.recycler.adapter as MainAdapter
+            adapter.submitList(it)
         }
-        ofFloat.addListener(object : Animator.AnimatorListener {
-            override fun onAnimationRepeat(animation: Animator?) {
-            }
 
-            override fun onAnimationEnd(animation: Animator?) {
-            }
+        binding.suggest.bind(vm.allLiveData, this)
 
-            override fun onAnimationCancel(animation: Animator?) {
-                binding.suggestGroup.alpha = 1F
+        binding.suggest.setOnItemClickListener {
+            vm.add2Selected(it) { success ->
+                if (success) {
+                    binding.edit.setText("")
+                }
             }
+        }
 
-            override fun onAnimationStart(animation: Animator?) {
-            }
-        })
-        ofFloat
+        vm.snackBarCaller.observe(this) {
+            alertSnackBar.setText(it).show()
+        }
     }
+
+    private fun initToolBar(info: CrateDefectDelegate.Info) {
+        binding.toolbar.title = info.title
+//        binding.toolbar.setNavigationIcon(R.drawable.back_ic)
+        binding.toolbar.subtitle =
+            "${info.year} 年 ${info.monthOfYear} 月 ${info.dayOfMonth} 日  ${info.hourOfDay}:${info.minute} "
+        setSupportActionBar(binding.toolbar)
+        binding.toolbar.setNavigationOnClickListener {
+            onBackPressed()
+        }
+    }
+
+    private val alertSnackBar by lazy { Snackbar.make(binding.root, "", Snackbar.LENGTH_LONG) }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         return super.onCreateOptionsMenu(menu)
@@ -124,8 +102,8 @@ class DefectActivity : AppCompatActivity() {
     }
 
     override fun onBackPressed() {
-        if (popupWindow.isShowing()) {
-            popupWindow.dismiss()
+        if (binding.back.visibility == View.VISIBLE) {
+            binding.back.visibility = View.INVISIBLE
         } else
             super.onBackPressed()
     }

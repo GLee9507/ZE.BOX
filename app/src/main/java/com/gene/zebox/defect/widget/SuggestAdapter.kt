@@ -8,9 +8,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
-import androidx.annotation.ColorInt
-import androidx.annotation.MainThread
-import androidx.lifecycle.LiveData
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.gene.zebox.defect.model.DefectItem
@@ -18,20 +15,22 @@ import kotlinx.coroutines.*
 import java.util.*
 import kotlin.collections.ArrayList
 
-class SuggestAdapter(private val allList: LiveData<Array<DefectItem>>) :
-    RecyclerView.Adapter<SuggestViewHolder>() {
 
+typealias RunAfter = (hasData: Boolean) -> Unit
+
+class SuggestAdapter :
+    RecyclerView.Adapter<SuggestViewHolder>() {
 
     var clickListener: ((data: DefectItem) -> Unit)? = null
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SuggestViewHolder {
         val view = LayoutInflater.from(parent.context)
             .inflate(android.R.layout.simple_list_item_1, parent, false)
-        return SuggestViewHolder(view)
+        return SuggestViewHolder(view, clickListener)
     }
 
     override fun onBindViewHolder(holder: SuggestViewHolder, position: Int) {
-            holder.bindData(data?.get(position ) ?: "")
+        holder.bindData(data?.get(position) ?: DefectItem.DEFAULT)
     }
 
     private lateinit var recyclerView: RecyclerView
@@ -44,18 +43,27 @@ class SuggestAdapter(private val allList: LiveData<Array<DefectItem>>) :
         return data?.size ?: 0
     }
 
+    internal var value: Array<DefectItem>? = null
 
     private var job: Job? = null
-    fun submit(input: CharSequence, block: (hasData: Boolean) -> Unit) {
+    fun submit(str: CharSequence, block: RunAfter) {
         job?.cancel()
-        val value = allList.value
+        val value = this.value
+        val input = str.trim()
+        if (input.isEmpty()) {
+            block.invoke(false)
+            data = null
+            notifyDataSetChanged()
+            return
+        }
         if (value.isNullOrEmpty()) {
             return
         }
         job = CoroutineScope(Dispatchers.Main).launch {
             var hasData = false
+
             val render = async(Dispatchers.IO) {
-                val result = ArrayList<CharSequence>()
+                val result = ArrayList<DefectItem>()
                 value.forEach item@{
                     var text = it.text
                     var offset = 0
@@ -80,7 +88,8 @@ class SuggestAdapter(private val allList: LiveData<Array<DefectItem>>) :
                                 Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
                             )
                         }
-                        result.add(spannableString)
+                        it.render = spannableString
+                        result.add(it)
                     }
                 }
                 if (result.isNotEmpty()) {
@@ -106,8 +115,11 @@ class SuggestAdapter(private val allList: LiveData<Array<DefectItem>>) :
                         return true
                     }
                 }
-                val calculateDiff = DiffUtil.calculateDiff(db)
+                result.sortByDescending {
+                    it.count
+                }
 
+                val calculateDiff = DiffUtil.calculateDiff(db)
                 return@async Pair(
                     result.toTypedArray(), calculateDiff
                 )
@@ -125,16 +137,24 @@ class SuggestAdapter(private val allList: LiveData<Array<DefectItem>>) :
 
     }
 
-    private var data: Array<CharSequence>? = null
+    private var data: Array<DefectItem>? = null
 
 }
 
-class SuggestViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+class SuggestViewHolder(view: View, listener: ((data: DefectItem) -> Unit)?) :
+    RecyclerView.ViewHolder(view) {
     private val tv by lazy { view.findViewById<TextView>(android.R.id.text1) }
-    fun bindData(data: CharSequence) {
-        tv.text = data
+    private var data: DefectItem? = null
+    fun bindData(data: DefectItem) {
+        this.data = data
+        tv.text = data.render
     }
 
+    init {
+        view.setOnClickListener {
+            listener?.invoke(data ?: DefectItem.DEFAULT)
+        }
+    }
 
 }
 

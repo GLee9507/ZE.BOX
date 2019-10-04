@@ -1,68 +1,47 @@
 package com.gene.zebox.defect.viewmodel
 
-import android.os.Handler
-import android.os.Looper
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.gene.zebox.App.Companion.EXCEPTION_HANDLER
 import com.gene.zebox.LetterUtil
 import com.gene.zebox.defect.model.DefectItem
 import com.gene.zebox.defect.model.DefectModel
+import com.gene.zebox.defect.widget.LiveEvent
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class DefectViewModel : ViewModel() {
-    companion object {
-        const val QUERY = 100
-    }
 
     private val model by lazy { DefectModel() }
     val edit = MutableLiveData<String>()
-    val queryResult = MutableLiveData<Array<DefectItem>?>()
     val selectResult = MutableLiveData<MutableList<DefectItem>?>()
     val allLiveData by lazy { model.getLiveData() }
-    private val handler by lazy {
-        Handler(Looper.getMainLooper()) {
-            return@Handler if (it.what == QUERY) {
-                val string = it.obj as String?
-                if (string.isNullOrEmpty()) {
-                    queryResult.value = null
-                    return@Handler true
-                }
-                viewModelScope.launch {
-                    val result = async(Dispatchers.IO) {
-                        model.queryInput(string)
-                    }
-                    queryResult.value = result.await()
-                }
-                true
-            } else false
+    val snackBarCaller by lazy { LiveEvent<String>() }
 
-        }
-    }
-    private val ob = Observer<String> {
-        handler.removeMessages(QUERY)
-        val message = handler.obtainMessage(QUERY, it)
-        handler.sendMessageDelayed(message, 256)
-    }
+    fun add2Selected(defectItem: DefectItem, block: (Boolean) -> Unit) {
 
-    init {
-        edit.observeForever(ob)
-    }
-
-    override fun onCleared() {
-        edit.removeObserver(ob)
-    }
-
-    fun add2Selected(defectItem: DefectItem) {
-        val list: MutableList<DefectItem> =
-            if (selectResult.value == null) ArrayList() else selectResult.value!!
-        list.add(defectItem)
-        selectResult.value = list
         viewModelScope.launch(Dispatchers.IO) {
+            val value = selectResult.value
+            val find = value?.find {
+                return@find it.text == defectItem.text
+            }
+            if (find != null) {
+                withContext(Dispatchers.Main) {
+                    block.invoke(false)
+                    snackBarCaller.value = "不可重复添加相同缺陷哦"
+                }
+                return@launch
+            }
+            val list: MutableList<DefectItem> =
+                if (selectResult.value == null) ArrayList() else ArrayList(selectResult.value!!)
+            list.add(defectItem)
+            withContext(Dispatchers.Main) {
+                selectResult.value = list
+                block.invoke(true)
+            }
             model.updateCountAndTime(defectItem)
         }
     }

@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">ZE.BOX</string>
+    <string name="date_picker_title">请选择超期日期</string>
 </resources>

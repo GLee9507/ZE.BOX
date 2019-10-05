@@ -20,6 +20,14 @@ class DefectViewModel : ViewModel() {
     val selectResult = MutableLiveData<MutableList<DefectItem>?>()
     val allLiveData by lazy { model.getLiveData() }
     val snackBarCaller by lazy { LiveEvent<String>() }
+    fun removeLastAdd() {
+
+        selectResult.value?.let {
+            it.subList(0, it.lastIndex)
+        }?.let {
+            selectResult.value = it
+        }
+    }
 
     fun add2Selected(defectItem: DefectItem, block: (Boolean) -> Unit) {
 
@@ -46,13 +54,12 @@ class DefectViewModel : ViewModel() {
         }
     }
 
-    fun newItem() {
-        val string = edit.value
-        if (string.isNullOrEmpty()) {
+    fun newItem(string: String) {
+        if (string.isEmpty()) {
             return
         }
         viewModelScope.launch(EXCEPTION_HANDLER) {
-            if (string.isNullOrEmpty()) {
+            if (string.isEmpty()) {
                 return@launch
             }
             val async = async(Dispatchers.IO + EXCEPTION_HANDLER) {

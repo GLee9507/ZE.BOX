@@ -9,7 +9,6 @@ import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 import android.widget.LinearLayout
 import androidx.fragment.app.DialogFragment
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModelProviders
 import androidx.lifecycle.observe
 import com.gene.zebox.databinding.DialogSuggestBinding
@@ -29,7 +28,7 @@ class SuggestDialog : DialogFragment() {
             binding.root,
             ""
             , Snackbar.LENGTH_LONG
-        ).setAction("撤销") { view ->
+        ).setAction("撤销") {
             vm.removeLastAdd()
         }
     }
@@ -37,21 +36,18 @@ class SuggestDialog : DialogFragment() {
     private val normalSnackbar by lazy {
         Snackbar.make(binding.root, "", Snackbar.LENGTH_LONG)
     }
+
     private lateinit var binding: DialogSuggestBinding
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-        binding = DialogSuggestBinding.inflate(inflater, container, false)
-        binding.vm = this.vm
-        edit = vm.edit
+    private lateinit var vm: DefectViewModel
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        vm = ViewModelProviders.of(activity!!)[DefectViewModel::class.java]
+        binding.vm = vm
         vm.edit.observe(this) {
             binding.searchView.query(it) { hasData ->
                 if (hasData || it.isEmpty()) {
                     newDefectSnackbar?.dismiss()
-                    newDefectSnackbar =
-                        null
+                    newDefectSnackbar = null
                 } else {
                     newDefectSnackbar =
                         Snackbar.make(binding.root, "空空如野，创建此缺陷？", Snackbar.LENGTH_INDEFINITE)
@@ -62,25 +58,38 @@ class SuggestDialog : DialogFragment() {
                 }
             }
         }
+        binding.searchView.bind(vm.allLiveData, this)
+
+    }
+
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        binding = DialogSuggestBinding.inflate(inflater, container, false)
+
         binding.parent.setOnClickListener {
             dismissAllowingStateLoss()
         }
-        binding.searchView.bind(vm.allLiveData, this)
+
         binding.searchView.setOnItemClickListener {
             vm.add2Selected(it) { success ->
-                if (success) {
-
+                if (success)
                     addDefectSnackbar.setText("“${it.text}”添加成功").show()
-                } else
+                else
                     normalSnackbar.setText("已添加过此缺陷了哦").show()
             }
         }
         return binding.root
     }
 
-    var edit: MutableLiveData<String>? = null
     fun reset() {
-        edit?.value = ""
+        try {
+            vm.edit.value = ""
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
     }
 
     override fun setupDialog(dialog: Dialog, style: Int) {
@@ -101,14 +110,14 @@ class SuggestDialog : DialogFragment() {
             interpolator = AccelerateInterpolator()
         }
     }
-    private val vm by lazy { ViewModelProviders.of(activity!!)[DefectViewModel::class.java] }
+
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         return Dialog(requireContext(), com.gene.zebox.R.style.MaterialSearch).apply {
             setOnShowListener {
-                inAnim.invoke().start()
+                //                inAnim.invoke().start()
 
                 val dialog = it as Dialog
-                dialog.window?.setWindowAnimations(-1)
+//                dialog.window?.setWindowAnimations(-1)
                 dialog.window?.setLayout(
                     LinearLayout.LayoutParams.MATCH_PARENT,
                     LinearLayout.LayoutParams.MATCH_PARENT

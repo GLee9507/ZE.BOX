@@ -22,7 +22,7 @@ class SuggestView : RecyclerView {
     )
 
 
-    val adapter = SuggestAdapter()
+    private val adapter = SuggestAdapter()
     fun bind(data: LiveData<Array<DefectItem>>, lifecycleOwner: LifecycleOwner) {
         setAdapter(adapter)
         data.observe(lifecycleOwner) {

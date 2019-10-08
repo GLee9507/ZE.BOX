@@ -33,6 +33,14 @@ class SuggestAdapter :
         holder.bindData(data?.get(position) ?: DefectItem.DEFAULT)
     }
 
+    override fun onBindViewHolder(
+        holder: SuggestViewHolder,
+        position: Int,
+        payloads: MutableList<Any>
+    ) {
+        super.onBindViewHolder(holder, position, payloads)
+    }
+
     private lateinit var recyclerView: RecyclerView
     override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
         super.onAttachedToRecyclerView(recyclerView)
@@ -50,15 +58,17 @@ class SuggestAdapter :
         job?.cancel()
         val value = this.value
         val input = str.trim()
-        if (input.isEmpty()) {
+        if (input.isEmpty() || value.isNullOrEmpty()) {
             block.invoke(false)
             data = null
             notifyDataSetChanged()
             return
         }
-        if (value.isNullOrEmpty()) {
-            return
-        }
+//        if (value.isNullOrEmpty()) {
+//            data = null
+//            block.invoke(false)
+//            return
+//        }
         job = CoroutineScope(Dispatchers.Main).launch {
             var hasData = false
 
@@ -101,7 +111,10 @@ class SuggestAdapter :
                     override fun areItemsTheSame(
                         oldItemPosition: Int,
                         newItemPosition: Int
-                    ) = data!![oldItemPosition].toString() == result[newItemPosition].toString()
+                    ) = Objects.equals(
+                        data!![oldItemPosition].toString(),
+                        result[newItemPosition].toString()
+                    )
 
                     override fun areContentsTheSame(
                         oldItemPosition: Int,

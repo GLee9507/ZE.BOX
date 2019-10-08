@@ -33,13 +33,6 @@ class SuggestAdapter :
         holder.bindData(data?.get(position) ?: DefectItem.DEFAULT)
     }
 
-    override fun onBindViewHolder(
-        holder: SuggestViewHolder,
-        position: Int,
-        payloads: MutableList<Any>
-    ) {
-        super.onBindViewHolder(holder, position, payloads)
-    }
 
     private lateinit var recyclerView: RecyclerView
     override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
@@ -98,28 +91,32 @@ class SuggestAdapter :
                                 Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
                             )
                         }
-                        it.render = spannableString
-                        result.add(it)
+                        result.add(it.clone().apply {
+                            this.render = spannableString
+                        })
                     }
                 }
                 if (result.isNotEmpty()) {
                     hasData = true
                 }
+                result.sortByDescending { it.count }
+
                 val db = object : DiffUtil.Callback() {
                     override fun getOldListSize() = data?.size ?: 0
                     override fun getNewListSize() = result.size
                     override fun areItemsTheSame(
                         oldItemPosition: Int,
                         newItemPosition: Int
-                    ) = Objects.equals(
-                        data!![oldItemPosition].toString(),
-                        result[newItemPosition].toString()
-                    )
+                    ) =
+                        data!![oldItemPosition].text == result[newItemPosition].text
 
                     override fun areContentsTheSame(
                         oldItemPosition: Int,
                         newItemPosition: Int
-                    ) = Objects.equals(data!![oldItemPosition], result[newItemPosition])
+                    ) = Objects.equals(
+                        data!![oldItemPosition].render,
+                        result[newItemPosition].render
+                    )
 
                     override fun getChangePayload(
                         oldItemPosition: Int,
@@ -127,9 +124,6 @@ class SuggestAdapter :
                     ): Any? {
                         return true
                     }
-                }
-                result.sortByDescending {
-                    it.count
                 }
 
                 val calculateDiff = DiffUtil.calculateDiff(db)

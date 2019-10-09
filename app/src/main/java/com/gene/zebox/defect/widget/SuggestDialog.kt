@@ -72,15 +72,20 @@ class SuggestDialog : DialogFragment() {
         binding.parent.setOnClickListener {
             dismissAllowingStateLoss()
         }
-
-        binding.searchView.setOnItemClickListener {
-            vm.add2Selected(it) { success ->
-                if (success)
-                    addDefectSnackbar.setText("“${it.text}”添加成功").show()
-                else
-                    normalSnackbar.setText("已添加过此缺陷了哦").show()
+        binding.searchView.setOnItemClickListener { data, selectOrEdit ->
+            if (selectOrEdit) {
+                vm.add2Selected(data) { success ->
+                    if (success)
+                        addDefectSnackbar.setText("“${data.text}”添加成功").show()
+                    else
+                        normalSnackbar.setText("已添加过此缺陷了哦").show()
+                }
+            } else {
+                binding.edit.setText(data.text)
+                binding.edit.setSelection(data.text.length)
             }
         }
+
         return binding.root
     }
 

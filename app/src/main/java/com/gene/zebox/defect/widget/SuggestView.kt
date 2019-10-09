@@ -34,7 +34,7 @@ class SuggestView : RecyclerView {
         adapter.submit(string, block)
     }
 
-    fun setOnItemClickListener(listener: (data: DefectItem) -> Unit) {
+    fun setOnItemClickListener(listener: OnItemClick) {
         adapter.clickListener = listener
     }
 

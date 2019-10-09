@@ -10,23 +10,43 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
+import com.gene.zebox.R
 import com.gene.zebox.defect.model.DefectItem
+import com.google.android.material.button.MaterialButton
 import kotlinx.coroutines.*
 import java.util.*
 import kotlin.collections.ArrayList
 
 
 typealias RunAfter = (hasData: Boolean) -> Unit
+typealias OnItemClick = (data: DefectItem, selectOrEdit: Boolean) -> Unit
 
 class SuggestAdapter :
     RecyclerView.Adapter<SuggestViewHolder>() {
 
-    var clickListener: ((data: DefectItem) -> Unit)? = null
+    var clickListener: OnItemClick? = null
+
+    private val itemClickListener by lazy {
+        View.OnClickListener {
+            if (it.id == R.id.btnEdit) {
+                clickListener?.invoke(
+                    (it.parent.parent.parent as View).getTag(R.integer.suggestItemData) as DefectItem,
+                    false
+                )
+            } else {
+                clickListener?.invoke(
+                    it.getTag(R.integer.suggestItemData) as DefectItem,
+                    true
+                )
+
+            }
+        }
+    }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SuggestViewHolder {
         val view = LayoutInflater.from(parent.context)
-            .inflate(android.R.layout.simple_list_item_1, parent, false)
-        return SuggestViewHolder(view, clickListener)
+            .inflate(R.layout.item_suggest, parent, false)
+        return SuggestViewHolder(view, itemClickListener)
     }
 
     override fun onBindViewHolder(holder: SuggestViewHolder, position: Int) {
@@ -148,19 +168,21 @@ class SuggestAdapter :
 
 }
 
-class SuggestViewHolder(view: View, listener: ((data: DefectItem) -> Unit)?) :
+class SuggestViewHolder(private val view: View, listener: View.OnClickListener) :
     RecyclerView.ViewHolder(view) {
-    private val tv by lazy { view.findViewById<TextView>(android.R.id.text1) }
+    private val tv by lazy { view.findViewById<TextView>(R.id.content) }
+    private val btnEdit by lazy { view.findViewById<MaterialButton>(R.id.btnEdit) }
     private var data: DefectItem? = null
     fun bindData(data: DefectItem) {
         this.data = data
         tv.text = data.render
+//        view.setTag(R.integer.suggestItemPos, adapterPosition)
+        view.setTag(R.integer.suggestItemData, data)
     }
 
     init {
-        view.setOnClickListener {
-            listener?.invoke(data ?: DefectItem.DEFAULT)
-        }
+        view.setOnClickListener(listener)
+        btnEdit.setOnClickListener(listener)
     }
 
 }

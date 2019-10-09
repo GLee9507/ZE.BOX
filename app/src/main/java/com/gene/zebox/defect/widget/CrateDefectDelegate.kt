@@ -4,14 +4,21 @@ import android.annotation.SuppressLint
 import android.app.Dialog
 import android.content.Context
 import android.content.DialogInterface
+import android.graphics.Color
 import android.os.Bundle
 import android.os.Parcel
 import android.os.Parcelable
+import android.text.Spannable
+import android.text.SpannableString
+import android.text.TextPaint
+import android.text.method.LinkMovementMethod
+import android.text.style.ClickableSpan
+import android.view.LayoutInflater
+import android.view.View
+import android.widget.TextView
 import androidx.annotation.MainThread
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.widget.AppCompatEditText
-import androidx.core.view.setPadding
 import androidx.fragment.app.DialogFragment
 import com.gene.zebox.R
 import com.google.android.material.datepicker.MaterialDatePicker
@@ -139,15 +146,34 @@ class Dialog1(private val listener: (dialog: DialogInterface, title: String, con
             com.google.android.material.R.attr.materialAlertDialogTheme,
             MaterialTimePicker::javaClass.name
         )
-        val editText = AppCompatEditText(requireContext())
-        editText.setPadding(dip2px(requireContext(), 10.toFloat()))
+//        val editText = AppCompatEditText(requireContext())
+        val view =
+            LayoutInflater.from(requireContext()).inflate(R.layout.dialog_new_defect_set, null)
+//        val num = view.findViewById<TextView>(R.id.num)
+//        val loc = view.findViewById<TextView>(R.id.loc)
+        val date = view.findViewById<TextView>(R.id.date)
+
+        date.movementMethod = LinkMovementMethod.getInstance()
+        date.text = SpannableString("点击设置截至日期与时间").apply {
+            this.setSpan(object : ClickableSpan() {
+                override fun onClick(widget: View) {
+                    DatePickerDialog.newInstance { view, year, monthOfYear, dayOfMonth ->  }.show(this@Dialog1.childFragmentManager,"11")
+                }
+
+                override fun updateDrawState(ds: TextPaint) {
+                    ds.color = Color.BLUE
+                    super.updateDrawState(ds)
+                }
+            }, 0, length , Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
+        }
+//        editText.setPadding(dip2px(requireContext(), 10.toFloat()))
         return AlertDialog.Builder(
             context!!,
             resolve
         ).setTitle("新建缺陷集")
             .setMessage("请输入标题")
             .setCancelable(false)
-            .setView(editText)
+            .setView(view)
             .create().apply {
                 setButton(DialogInterface.BUTTON_POSITIVE, "下一步", null, null)
                 setButton(
@@ -156,8 +182,8 @@ class Dialog1(private val listener: (dialog: DialogInterface, title: String, con
                 )
                 setOnShowListener {
                     this.getButton(DialogInterface.BUTTON_POSITIVE).setOnClickListener {
-                        val toString = editText.text.toString().trim()
-                        listener.invoke(this, toString, true)
+                        //                        val toString = editText.text.toString().trim()
+//                        listener.invoke(this, toString, true)
                     }
                     this.getButton(DialogInterface.BUTTON_NEGATIVE).setOnClickListener {
                         listener.invoke(this, Int.MIN_VALUE.toString(), false)

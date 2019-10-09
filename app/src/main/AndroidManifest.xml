@@ -13,16 +13,15 @@
         android:theme="@style/Theme.MaterialComponents.DayNight.NoActionBar">
         <activity android:name=".main.view.MainActivity">
 
-        </activity>
-        <activity android:name=".defect.view.DefectActivity"
-            >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".defect.view.SuggestActivity" />
+        <activity android:name=".defect.view.DefectActivity"
+            >
+        </activity>
     </application>
 
 </manifest>

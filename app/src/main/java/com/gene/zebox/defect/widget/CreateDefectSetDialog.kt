@@ -1,10 +1,12 @@
 package com.gene.zebox.defect.widget
 
 import android.app.Dialog
+import android.content.DialogInterface
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.DialogFragment
 import com.gene.zebox.R
@@ -29,7 +31,12 @@ class CreateDefectSetDialog : DialogFragment() {
                 .setPositiveButton("好", null)
                 .setNegativeButton("不好", null)
                 .setView(initView())
-                .create()
+                .create().apply {
+                    //TODO 自定义listener ，避免自动关闭
+                    getButton(DialogInterface.BUTTON_POSITIVE).setOnClickListener {
+                        Toast.makeText(requireContext(), "asd", Toast.LENGTH_LONG).show()
+                    }
+                }
         else
             dialogRef.get()!!
     }
@@ -42,8 +49,5 @@ class CreateDefectSetDialog : DialogFragment() {
             viewRef.get()!!
     }
 
-    private fun initDialog(dialog: Dialog) {
-        dialog.setTitle("创建缺陷集")
-    }
 
 }

@@ -101,7 +101,7 @@ class CrateDefectDelegate(private val context: AppCompatActivity) {
     }
     private val datePicker by lazy {
         MaterialDatePicker.Builder.datePicker()
-            .setTitleTextResId(R.string.date_picker_title)
+            .setTitleText(R.string.date_picker_title)
             .build().apply {
                 addOnPositiveButtonClickListener {
                     timePicker.show(this@CrateDefectDelegate.context.supportFragmentManager, "3")
@@ -151,20 +151,21 @@ class Dialog1(private val listener: (dialog: DialogInterface, title: String, con
             LayoutInflater.from(requireContext()).inflate(R.layout.dialog_new_defect_set, null)
 //        val num = view.findViewById<TextView>(R.id.num)
 //        val loc = view.findViewById<TextView>(R.id.loc)
-        val date = view.findViewById<TextView>(R.id.date)
+        val date = view.findViewById<TextView>(1)
 
         date.movementMethod = LinkMovementMethod.getInstance()
         date.text = SpannableString("点击设置截至日期与时间").apply {
             this.setSpan(object : ClickableSpan() {
                 override fun onClick(widget: View) {
-                    DatePickerDialog.newInstance { view, year, monthOfYear, dayOfMonth ->  }.show(this@Dialog1.childFragmentManager,"11")
+                    DatePickerDialog.newInstance { view, year, monthOfYear, dayOfMonth -> }
+                        .show(this@Dialog1.childFragmentManager, "11")
                 }
 
                 override fun updateDrawState(ds: TextPaint) {
                     ds.color = Color.BLUE
                     super.updateDrawState(ds)
                 }
-            }, 0, length , Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
+            }, 0, length, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
         }
 //        editText.setPadding(dip2px(requireContext(), 10.toFloat()))
         return AlertDialog.Builder(

@@ -2,11 +2,9 @@ package com.gene.zebox.defect.view
 
 import android.os.Bundle
 import android.view.Menu
-import android.view.View
-import android.view.ViewAnimationUtils
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
-import androidx.lifecycle.ViewModelProviders
 import androidx.lifecycle.observe
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.gene.zebox.R
@@ -26,8 +24,8 @@ class DefectActivity : AppCompatActivity() {
             R.layout.activity_new_task
         )
     }
-    private val vm by lazy { ViewModelProviders.of(this)[DefectViewModel::class.java] }
 
+    private val vm: DefectViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

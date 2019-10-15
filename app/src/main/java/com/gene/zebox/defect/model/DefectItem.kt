@@ -8,23 +8,21 @@ import androidx.room.PrimaryKey
 
 @Entity(tableName = "defect_item")
 class DefectItem(
-    @PrimaryKey
     var text: String,
     var letter: String,
     var timestamp: Long = 0,
-    //使用次数
+//使用次数
     var count: Long = 0
-) : Comparator<DefectItem>, Cloneable {
-    override fun compare(o1: DefectItem, o2: DefectItem): Int {
-        return (o1.count - o2.count).toInt()
-    }
+) :  Cloneable {
+
 
     public override fun clone(): DefectItem {
         return DefectItem(text, letter, timestamp, count).apply {
             this.render = this@DefectItem.render
         }
     }
-
+    @PrimaryKey(autoGenerate = true)
+    var id: Long? = null
     @Ignore
     var render: SpannableString? = null
 

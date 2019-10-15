@@ -5,6 +5,7 @@ import android.os.Build
 import androidx.room.Room
 import java.text.SimpleDateFormat
 import java.util.*
+import java.util.concurrent.locks.ReentrantReadWriteLock
 
 public val DATA_FORMAT by WeakRefLazy {
     SimpleDateFormat(
@@ -25,3 +26,6 @@ val DB by lazy {
     Room.databaseBuilder(CONTEXT, DefectDatabase::class.java, "database-defect")
         .build()
 }
+
+// val LOCK by lazy { ReentrantReadWriteLock(true) }
+

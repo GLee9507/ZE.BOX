@@ -1,15 +1,14 @@
 package com.gene.zebox.defect.model
 
 import androidx.lifecycle.LiveData
-import androidx.room.RoomSQLiteQuery
+import androidx.sqlite.db.SimpleSQLiteQuery
+import androidx.sqlite.db.SupportSQLiteQuery
 import com.gene.zebox.DB
-import java.util.concurrent.locks.ReentrantReadWriteLock
 import kotlin.concurrent.read
 import kotlin.concurrent.write
 
 class DefectModel {
     private val dao by lazy { DB.defectItemDao }
-    private val lock by lazy { ReentrantReadWriteLock(true) }
 
 
     fun queryInput(str: String): Array<DefectItem> {
@@ -28,24 +27,24 @@ class DefectModel {
             }
         }
         sql.append(" ORDER BY count DESC")
-        val query = RoomSQLiteQuery.acquire(sql.toString(), 0)
-        return lock.read {
+
+
             return try {
-                dao.query(query)
+                dao.query(SimpleSQLiteQuery(sql.toString()))
             } catch (e: Exception) {
                 throw e
             }
-        }
+
     }
 
-    fun getLiveData(): LiveData<Array<DefectItem>> = lock.read { dao.query() }
+    fun getLiveData(): LiveData<Array<DefectItem>> =  dao.query()
 
     fun delete(vararg defectItem: DefectItem) {
-        lock.write { dao.delete(*defectItem) }
+        dao.delete(*defectItem)
     }
 
     fun insert(vararg defectItem: DefectItem) {
-        lock.write { dao.insert(*defectItem) }
+       dao.insert(*defectItem)
     }
 
     fun updateCountAndTime(vararg defectItem: DefectItem) {
@@ -53,6 +52,6 @@ class DefectModel {
             it.count = it.count + 1
             it.timestamp = System.currentTimeMillis()
         }
-        lock.write { dao.update(*defectItem) }
+        dao.update(*defectItem)
     }
 }

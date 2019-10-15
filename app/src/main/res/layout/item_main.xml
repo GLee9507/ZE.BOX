@@ -7,12 +7,22 @@
     android:padding="10dp">
 
     <com.google.android.material.textview.MaterialTextView
-        android:id="@+id/title"
+        android:id="@+id/loc"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:textSize="22dp"
         android:textStyle="bold"
         tools:text="育新小区" />
+
+    <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/num"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="16dp"
+        android:layout_marginTop="10dp"
+
+        android:textStyle="bold"
+        tools:text="12312312" />
 
     <com.google.android.material.textview.MaterialTextView
         android:id="@+id/content"

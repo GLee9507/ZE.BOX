@@ -2,6 +2,7 @@ package com.gene.zebox.defect.model
 
 import androidx.lifecycle.LiveData
 import androidx.room.*
+import androidx.sqlite.db.SupportSQLiteQuery
 
 
 @Dao
@@ -16,7 +17,10 @@ interface DefectItemDao {
     fun update(vararg defectItem: DefectItem)
 
     @RawQuery
-    fun query(query: RoomSQLiteQuery): Array<DefectItem>
+    fun query(query: SupportSQLiteQuery): Array<DefectItem>
+
+    @Query("SELECT * FROM defect_item WHERE id IN(:ids)")
+    fun query(ids: Array<Long>): Array<DefectItem>
 
     @Query("SELECT * FROM defect_item ")
     fun query(): LiveData<Array<DefectItem>>

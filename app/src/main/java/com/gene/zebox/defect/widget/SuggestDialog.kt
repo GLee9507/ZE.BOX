@@ -97,9 +97,6 @@ class SuggestDialog : DialogFragment() {
         }
     }
 
-    override fun setupDialog(dialog: Dialog, style: Int) {
-        super.setupDialog(dialog, style)
-    }
 
     private val inAnim = {
         val view = binding.root

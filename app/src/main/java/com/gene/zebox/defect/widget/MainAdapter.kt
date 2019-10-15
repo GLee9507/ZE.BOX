@@ -9,12 +9,13 @@ import android.widget.TextView
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.gene.zebox.App
+import com.gene.zebox.CONTEXT
 import com.gene.zebox.defect.model.DefectItem
 
 class MainAdapter : ListAdapter<DefectItem, MainViewHolder>(DefectItem.ITEM_CALLBACK) {
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MainViewHolder {
         return MainViewHolder(
-            LayoutInflater.from(App.CONTEXT).inflate(
+            LayoutInflater.from(CONTEXT).inflate(
                 R.layout.simple_list_item_1,
                 parent,
                 false

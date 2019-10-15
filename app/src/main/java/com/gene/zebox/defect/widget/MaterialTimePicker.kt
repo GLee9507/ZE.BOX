@@ -9,7 +9,7 @@ import androidx.fragment.app.FragmentManager
 import com.google.android.material.resources.MaterialAttributes
 import java.util.*
 
-class MaterialTimePicker(val listener: (confirm: Boolean, hourOfDay: Int, minute: Int) -> Unit) :
+class MaterialTimePicker(private val listener: (dateTime: Long) -> Unit) :
     DialogFragment() {
     @SuppressLint("RestrictedApi")
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
@@ -20,25 +20,28 @@ class MaterialTimePicker(val listener: (confirm: Boolean, hourOfDay: Int, minute
         )
 
         return TimePickerDialog(requireContext(), resolve, { view, hourOfDay, minute ->
-            listener.invoke(true, hourOfDay, minute)
-        }, hourOfDay, minute, true).apply {
+
+            listener.invoke(dateTime + hourOfDay * 60 * 60 * 1000 + minute * 60  * 1000)
+        }, -1, -1, true).apply {
             setMessage("请选择超期时间")
             setCanceledOnTouchOutside(false)
             setOnCancelListener {
-                listener.invoke(false, -1, -1)
+                //                listener.invoke(false, -1, -1)
+            }
+            setOnShowListener {
+                val hourOfDay = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
+                val minute = Calendar.getInstance().get(Calendar.MINUTE)
+                if (it is TimePickerDialog) {
+                    it.updateTime(hourOfDay, minute)
+                }
+
             }
         }
     }
 
-    private var hourOfDay = -1
-    private var minute = -1
-    fun show(manager: FragmentManager) {
-        hourOfDay = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
-        minute = Calendar.getInstance().get(Calendar.MINUTE)
-        dialog?.let {
-            val timePickerDialog = it as TimePickerDialog
-            timePickerDialog.updateTime(hourOfDay, minute)
-        }
-        super.show(manager, "123")
+    var dateTime = 0L
+    fun showNow(date: Long, manager: FragmentManager) {
+        dateTime = date
+        showNow(manager, "timePicker")
     }
 }

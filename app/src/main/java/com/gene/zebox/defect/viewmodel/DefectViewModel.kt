@@ -3,7 +3,6 @@ package com.gene.zebox.defect.viewmodel
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.gene.zebox.App.Companion.EXCEPTION_HANDLER
 import com.gene.zebox.LetterUtil
 import com.gene.zebox.defect.model.DefectItem
 import com.gene.zebox.defect.model.DefectModel
@@ -21,7 +20,6 @@ class DefectViewModel : ViewModel() {
     val allLiveData by lazy { model.getLiveData() }
     val snackBarCaller by lazy { LiveEvent<String>() }
     fun removeLastAdd() {
-
         selectResult.value?.let {
             it.subList(0, it.lastIndex)
         }?.let {
@@ -58,11 +56,11 @@ class DefectViewModel : ViewModel() {
         if (string.isEmpty()) {
             return
         }
-        viewModelScope.launch(EXCEPTION_HANDLER) {
+        viewModelScope.launch(Dispatchers.Main) {
             if (string.isEmpty()) {
                 return@launch
             }
-            val async = async(Dispatchers.IO + EXCEPTION_HANDLER) {
+            val async = async(Dispatchers.IO) {
                 val defectItem = DefectItem(
                     string,
                     LetterUtil.getSpells(string)
@@ -72,7 +70,7 @@ class DefectViewModel : ViewModel() {
                         defectItem
                     )
                 } catch (e: Exception) {
-                    throw e
+                    e.printStackTrace()
                 }
                 return@async defectItem
             }

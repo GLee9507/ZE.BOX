@@ -2,13 +2,13 @@ package com.gene.zebox.defect.model
 
 import androidx.lifecycle.LiveData
 import androidx.room.RoomSQLiteQuery
-import com.gene.zebox.App
+import com.gene.zebox.DB
 import java.util.concurrent.locks.ReentrantReadWriteLock
 import kotlin.concurrent.read
 import kotlin.concurrent.write
 
 class DefectModel {
-    private val dao by lazy { App.DB.defectDao }
+    private val dao by lazy { DB.defectItemDao }
     private val lock by lazy { ReentrantReadWriteLock(true) }
 
 

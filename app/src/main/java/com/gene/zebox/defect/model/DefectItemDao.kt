@@ -5,7 +5,7 @@ import androidx.room.*
 
 
 @Dao
-interface DefectDao {
+interface DefectItemDao {
     @Delete
     fun delete(vararg defectItem: DefectItem)
 

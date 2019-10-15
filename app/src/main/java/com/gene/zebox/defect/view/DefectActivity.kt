@@ -10,7 +10,6 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.gene.zebox.R
 import com.gene.zebox.databinding.ActivityNewTaskBinding
 import com.gene.zebox.defect.viewmodel.DefectViewModel
-import com.gene.zebox.defect.widget.CrateDefectDelegate
 import com.gene.zebox.defect.widget.MainAdapter
 import com.gene.zebox.defect.widget.SuggestDialog
 import com.google.android.material.snackbar.Snackbar
@@ -29,8 +28,8 @@ class DefectActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val info = intent.getParcelableExtra<CrateDefectDelegate.Info>("info")
-        initToolBar(info ?: CrateDefectDelegate.Info())
+//        val info = intent.getParcelableExtra<CrateDefectDelegate.Info>("info")
+//        initToolBar(info ?: CrateDefectDelegate.Info())
         binding.lifecycleOwner = this
         binding.vm = vm
         binding.recycler.layoutManager = LinearLayoutManager(this)
@@ -53,18 +52,18 @@ class DefectActivity : AppCompatActivity() {
     }
 
 
-    private fun initToolBar(info: CrateDefectDelegate.Info) {
-        binding.toolbar.title = info.title
-        binding.toolbar.subtitle =
-            "${info.year} 年 ${info.monthOfYear} 月 ${info.dayOfMonth} 日  ${info.hourOfDay}:${info.minute} "
-        setSupportActionBar(binding.toolbar)
-        binding.toolbar.setNavigationOnClickListener {
-            onBackPressed()
-        }
-        binding.toolbar.setOnMenuItemClickListener {
-            binding.fabBottomAppbar.performClick()
-        }
-    }
+//    private fun initToolBar(info: CrateDefectDelegate.Info) {
+//        binding.toolbar.title = info.title
+//        binding.toolbar.subtitle =
+//            "${info.year} 年 ${info.monthOfYear} 月 ${info.dayOfMonth} 日  ${info.hourOfDay}:${info.minute} "
+//        setSupportActionBar(binding.toolbar)
+//        binding.toolbar.setNavigationOnClickListener {
+//            onBackPressed()
+//        }
+//        binding.toolbar.setOnMenuItemClickListener {
+//            binding.fabBottomAppbar.performClick()
+//        }
+//    }
 
 
     private val suggestDialog by lazy {

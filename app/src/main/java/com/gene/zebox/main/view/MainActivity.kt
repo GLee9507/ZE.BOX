@@ -6,13 +6,11 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.gene.zebox.R
 import com.gene.zebox.defect.view.DefectActivity
-import com.gene.zebox.defect.widget.CrateDefectDelegate
 import com.gene.zebox.defect.widget.CreateDefectSetDialog
 import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity() {
 
-    private val crateDefectDelegate by lazy { CrateDefectDelegate(this) }
     private val dialog by lazy { CreateDefectSetDialog() }
 
     @SuppressLint("RestrictedApi")
@@ -20,17 +18,10 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         btn.setOnClickListener {
-//            crateDefectDelegate.start {
-//                startActivity(Intent(this, DefectActivity::class.java).apply {
-//                    putExtra("info", it)
-//                })
-//            }
             dialog.show(supportFragmentManager,"asd")
         }
 
     }
-
-
 }
 
 
